@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Príbehy Generátor</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Removed modal styles as they are no longer needed */
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-700">
+        <h1 class="text-4xl font-extrabold text-white mb-8 text-center tracking-wide">
+            AI Príbehy Generátor
+        </h1>
+
+        <!-- Sekcia ovládacích prvkov -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <select
+                id="storyType"
+                class="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 w-full sm:w-auto"
+            >
+                <option value="scary">Strašidelný príbeh</option>
+                <option value="fantasy">Fantasy príbeh</option>
+                <option value="sci-fi">Sci-Fi príbeh</option>
+                <option value="mystery">Mysteriózny príbeh</option>
+            </select>
+            <button
+                id="generateStoryBtn"
+                class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-200 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            >
+                Generovať príbeh
+            </button>
+        </div>
+
+        <!-- Sekcia výstupu príbehu -->
+        <div class="relative bg-gray-700 p-6 rounded-lg min-h-[200px] flex items-center justify-center border border-gray-600 mb-8">
+            <!-- Správa o načítavaní príbehu -->
+            <p id="loadingStoryMessage" class="hidden text-gray-400 text-lg animate-pulse">Generujem príbeh...</p>
+            
+            <!-- Správa o chybe pri čítaní reči -->
+            <p id="speechErrorMessage" class="hidden absolute top-4 left-1/2 -translate-x-1/2 text-red-400 text-md"></p>
+
+            <!-- Správa o pripájaní AI pre čítanie -->
+            <p id="connectingAIMessage" class="hidden absolute top-4 left-1/2 -translate-x-1/2 text-blue-400 text-md animate-pulse">Pripájam AI...</p>
+
+            <!-- Obsah príbehu -->
+            <div
+                id="storyContent"
+                class="hidden text-gray-200 text-lg leading-relaxed cursor-pointer hover:text-blue-300 transition duration-200 text-left"
+                style="white-space: pre-wrap;"
+            >
+                <!-- Tu sa zobrazí vygenerovaný príbeh -->
+            </div>
+
+            <!-- Počiatočná správa -->
+            <p id="initialMessage" class="text-gray-500 text-lg italic">
+                Vyber typ príbehu a klikni na "Generovať príbeh".
+            </p>
+        </div>
+
+        <!-- Správa o stave generovania (pôvodne limitMessageContainer) -->
+        <div id="statusMessageContainer" class="text-center text-sm px-4">
+            <p id="statusMessage" class="text-gray-400 mb-4">Generovanie príbehov je úplne zadarmo!</p>
+            <!-- Premium options and payment info removed -->
+        </div>
+    </div>
+
+    <!-- Payment Simulation Modal removed -->
+
+    <script>
+        // DOM elementy
+        const storyTypeSelect = document.getElementById('storyType');
+        const generateStoryBtn = document.getElementById('generateStoryBtn');
+        const loadingStoryMessage = document.getElementById('loadingStoryMessage');
+        const speechErrorMessage = document.getElementById('speechErrorMessage');
+        const connectingAIMessage = document.getElementById('connectingAIMessage');
+        const storyContentDiv = document.getElementById('storyContent');
+        const initialMessage = document.getElementById('initialMessage');
+        const statusMessage = document.getElementById('statusMessage'); // Updated ID from limitMessage
+
+        // Globálna premenná pre aktuálny príbeh
+        let currentStory = '';
+        // Referencia na SpeechSynthesisUtterance, aby sme mohli zastaviť čítanie
+        let currentUtterance = null;
+
+        // Removed all constants related to credit system and premium packages
+
+        // Funkcia na zobrazenie/skrytie elementov
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
+
+        // Removed showModal function
+
+        // Simplified checkGenerationLimit function
+        function checkGenerationLimit() {
+            // All generation is free, so just ensure the button is enabled
+            generateStoryBtn.disabled = false;
+            statusMessage.textContent = 'Generovanie príbehov je úplne zadarmo!';
+        }
+
+        // Removed activatePremiumLite, activatePremiumMid, activatePremium functions
+
+        // Funkcia na generovanie príbehu pomocou Gemini API
+        async function generateStory() {
+            // Removed all credit/premium checks as generation is free
+            
+            showElement(loadingStoryMessage);
+            hideElement(storyContentDiv);
+            hideElement(initialMessage);
+            hideElement(speechErrorMessage);
+            currentStory = '';
+
+            if (currentUtterance && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                hideElement(connectingAIMessage);
+            }
+
+            let promptText = '';
+            switch (storyTypeSelect.value) {
+                case 'scary':
+                    promptText = "Napíš krátky, strašidelný príbeh, ktorý sa odohráva v opustenom dome.";
+                    break;
+                case 'fantasy':
+                    promptText = "Napíš krátky fantasy príbeh o mladom čarodejníkovi, ktorý objaví skrytý portál.";
+                    break;
+                case 'sci-fi':
+                    promptText = "Napíš krátky sci-fi príbeh o posádke vesmírnej lode, ktorá narazí na neznámy signál.";
+                    break;
+                case 'mystery':
+                    promptText = "Napíš krátky detektívny príbeh, kde je potrebné vyriešiť záhadu zmiznutého predmetu.";
+                    break;
+                default:
+                    promptText = "Napíš krátky a zaujímavý príbeh.";
+                    break;
+            }
+
+            generateStoryBtn.disabled = true;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyD0OIR4P5gjUBvVJfWUSYZmQGck_aKoVv8";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const generatedText = result.candidates[0].content.parts[0].text;
+                    currentStory = generatedText;
+                    storyContentDiv.textContent = generatedText;
+                    showElement(storyContentDiv);
+
+                    // Removed credit deduction as generation is free
+                } else {
+                    storyContentDiv.textContent = 'Generovanie príbehu zlyhalo. Skúste to, prosím, znova.';
+                    showElement(storyContentDiv);
+                }
+            } catch (error) {
+                console.error('Chyba pri generovaní príbehu:', error);
+                storyContentDiv.textContent = 'Nastala chyba pri generovaní príbehu. Skúste to, prosím, znova.';
+                showElement(storyContentDiv);
+            } finally {
+                hideElement(loadingStoryMessage);
+                generateStoryBtn.disabled = false;
+                checkGenerationLimit(); // Still call to ensure button state is correct
+            }
+        }
+
+        // Funkcia na čítanie príbehu pomocou Web Speech API
+        function readStory() {
+            if (!currentStory) {
+                return;
+            }
+
+            if (currentUtterance && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+
+            hideElement(speechErrorMessage);
+            showElement(connectingAIMessage);
+
+            setTimeout(() => {
+                const synth = window.speechSynthesis;
+                const utterance = new SpeechSynthesisUtterance(currentStory);
+                utterance.lang = 'sk-SK';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+
+                currentUtterance = utterance;
+
+                utterance.onend = () => {
+                    hideElement(connectingAIMessage);
+                    hideElement(speechErrorMessage);
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('Chyba pri čítaní príbehu:', event.error || event);
+                    speechErrorMessage.textContent = `Chyba pri čítaní: ${event.error ? `(${event.error})` : 'Neznáma chyba.'}`;
+                    showElement(speechErrorMessage);
+                    hideElement(connectingAIMessage);
+                };
+
+                synth.speak(utterance);
+            }, 500);
+        }
+
+        // Event Listeners
+        generateStoryBtn.addEventListener('click', generateStory);
+        storyContentDiv.addEventListener('click', readStory);
+        // Removed event listeners for premium buttons
+
+        // Pri načítaní stránky skontrolujeme limit
+        window.onload = checkGenerationLimit;
+        // Removed setInterval for credit regeneration
+    </script>
+</body>
+</html>
