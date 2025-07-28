@@ -31,6 +31,7 @@
                 <option value="fantasy">Fantasy príbeh</option>
                 <option value="sci-fi">Sci-Fi príbeh</option>
                 <option value="mystery">Mysteriózny príbeh</option>
+                <option value="horror">Hororový príbeh</option> <!-- Nová možnosť -->
             </select>
             <button
                 id="generateStoryBtn"
@@ -91,8 +92,6 @@
         // Referencia na SpeechSynthesisUtterance, aby sme mohli zastaviť čítanie
         let currentUtterance = null;
 
-        // Removed all constants related to credit system and premium packages
-
         // Funkcia na zobrazenie/skrytie elementov
         function showElement(element) {
             element.classList.remove('hidden');
@@ -102,8 +101,6 @@
             element.classList.add('hidden');
         }
 
-        // Removed showModal function
-
         // Simplified checkGenerationLimit function
         function checkGenerationLimit() {
             // All generation is free, so just ensure the button is enabled
@@ -111,12 +108,8 @@
             statusMessage.textContent = 'Generovanie príbehov je úplne zadarmo!';
         }
 
-        // Removed activatePremiumLite, activatePremiumMid, activatePremium functions
-
         // Funkcia na generovanie príbehu pomocou Gemini API
         async function generateStory() {
-            // Removed all credit/premium checks as generation is free
-            
             showElement(loadingStoryMessage);
             hideElement(storyContentDiv);
             hideElement(initialMessage);
@@ -141,6 +134,9 @@
                     break;
                 case 'mystery':
                     promptText = "Napíš krátky detektívny príbeh, kde je potrebné vyriešiť záhadu zmiznutého predmetu.";
+                    break;
+                case 'horror': // Nový typ príbehu
+                    promptText = "Napíš extrémne desivý hororový príbeh, ktorý vyvolá zimomriavky a pocit úzkosti. Zameraj sa na psychologický teror a pomaly budovanú atmosféru strachu.";
                     break;
                 default:
                     promptText = "Napíš krátky a zaujímavý príbeh.";
@@ -173,7 +169,6 @@
                     storyContentDiv.textContent = generatedText;
                     showElement(storyContentDiv);
 
-                    // Removed credit deduction as generation is free
                 } else {
                     storyContentDiv.textContent = 'Generovanie príbehu zlyhalo. Skúste to, prosím, znova.';
                     showElement(storyContentDiv);
@@ -230,11 +225,10 @@
         // Event Listeners
         generateStoryBtn.addEventListener('click', generateStory);
         storyContentDiv.addEventListener('click', readStory);
-        // Removed event listeners for premium buttons
 
         // Pri načítaní stránky skontrolujeme limit
         window.onload = checkGenerationLimit;
-        // Removed setInterval for credit regeneration
     </script>
 </body>
 </html>
+
