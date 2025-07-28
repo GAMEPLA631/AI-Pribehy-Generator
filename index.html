@@ -170,8 +170,11 @@
                     showElement(storyContentDiv);
 
                 } else {
-                    storyContentDiv.textContent = 'Generovanie príbehu zlyhalo. Skúste to, prosím, znova.';
-                    showElement(storyContentDiv);
+                    // Ak AI nevrátila platný obsah, jednoducho skryjeme storyContentDiv
+                    // a zobrazíme počiatočnú správu, aby používateľ vedel, čo má robiť.
+                    hideElement(storyContentDiv);
+                    showElement(initialMessage);
+                    console.error('Gemini API nevrátilo platný obsah príbehu.');
                 }
             } catch (error) {
                 console.error('Chyba pri generovaní príbehu:', error);
@@ -231,4 +234,5 @@
     </script>
 </body>
 </html>
+
 
