@@ -16,7 +16,7 @@
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
 
-    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-700">
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max_w_2xl border border-gray-700">
         <h1 class="text-4xl font-extrabold text-white mb-8 text-center tracking-wide">
             AI Príbehy Generátor
         </h1>
@@ -117,7 +117,7 @@
                 <option value="paranormal-romance">Paranormálna romanca</option>
                 <option value="historical-romance">Historická romanca</option>
                 <option value="contemporary-romance">Súčasná romanca</option>
-                <option value="erotic-romance">Erotická romanca</option>
+                <option value="travelogue">Cestopisný príbeh</option>
                 <option value="romantic-comedy">Romantická komédia</option>
                 <option value="dark-comedy">Čierna komédia</option>
                 <option value="farce">Fraška</option>
@@ -140,6 +140,8 @@
                 <option value="quest">Príbeh o výprave</option>
                 <option value="bildungsroman-fantasy">Fantasy Bildungsroman</option>
                 <option value="bildungsroman-sci-fi">Sci-Fi Bildungsroman</option>
+                <option value="philosophical-comedy">Filozofická komédia</option> <!-- Nová kategória 1 -->
+                <option value="cryptozoology">Kryptozoológia</option> <!-- Nová kategória 2 -->
             </select>
             <button
                 id="generateStoryBtn"
@@ -501,8 +503,8 @@
                 case 'contemporary-romance':
                     promptText = "Napíš krátku súčasnú romancu odohrávajúcu sa v dnešnej dobe, zameranú na moderné vzťahy.";
                     break;
-                case 'erotic-romance':
-                    promptText = "Napíš krátku erotickú romancu s dôrazom na zmyselnosť a intímne scény.";
+                case 'travelogue':
+                    promptText = "Napíš krátky cestopisný príbeh o dobrodružnej ceste do exotickej krajiny, s opisom kultúry a zážitkov.";
                     break;
                 case 'romantic-comedy':
                     promptText = "Napíš krátku romantickú komédiu s vtipnými situáciami a šťastným romantickým koncom.";
@@ -570,6 +572,12 @@
                 case 'bildungsroman-sci-fi':
                     promptText = "Napíš sci-fi príbeh o dospievaní, kde mladý hrdina objavuje svoje miesto v technologicky vyspelom svete alebo vo vesmíre.";
                     break;
+                case 'philosophical-comedy':
+                    promptText = "Napíš krátku filozofickú komédiu, ktorá vtipným spôsobom skúma hlboké existenciálne otázky alebo absurditu ľudskej existencie.";
+                    break;
+                case 'cryptozoology':
+                    promptText = "Napíš krátky príbeh o objavení alebo stretnutí s kryptidom (napr. Bigfoot, Nessie) v modernom svete, zameraný na napätie a záhadu.";
+                    break;
                 default:
                     promptText = "Napíš krátky a zaujímavý príbeh.";
                     break;
@@ -596,14 +604,14 @@
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
-                    const generatedText = result.candidates[0].content.parts[0].text;
+                    let generatedText = result.candidates[0].content.parts[0].text;
+                    // Odstránenie všetkých hviezdičiek z vygenerovaného textu
+                    generatedText = generatedText.replace(/\*/g, ''); 
                     currentStory = generatedText;
                     storyContentDiv.textContent = generatedText;
                     showElement(storyContentDiv);
 
                 } else {
-                    // Ak AI nevrátila platný obsah, jednoducho skryjeme storyContentDiv
-                    // a zobrazíme počiatočnú správu, aby používateľ vedel, čo má robiť.
                     hideElement(storyContentDiv);
                     showElement(initialMessage);
                     console.error('Gemini API nevrátilo platný obsah príbehu.');
@@ -615,7 +623,7 @@
             } finally {
                 hideElement(loadingStoryMessage);
                 generateStoryBtn.disabled = false;
-                checkGenerationLimit(); // Still call to ensure button state is correct
+                checkGenerationLimit();
             }
         }
 
